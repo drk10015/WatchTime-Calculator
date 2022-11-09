@@ -62,25 +62,36 @@ def attachDateToObj(id, dict, date) -> None:
         if obj.id == id:
             obj.date = date
 #Creates a video object from the decoded json
-def getVideofromJSON(json) -> Video:
+def getVideofromJSON(file, json) -> Video:
     youtubeVidBase = "https://www.youtube.com/watch?v="
     youtubeChannelBase = "https://www.youtube.com/channel/"
-    try:
-        items = json['items']
-        ret = []
-        for video in items:
-            ret.append(Video(youtubeVidBase + video['id'], 
-                youtubeChannelBase + video['snippet']['channelId'],
-                video['id'],
-                fromISOtoSec(video['contentDetails']['duration']),
-                video['snippet']['channelTitle'],
-                video['snippet']['categoryId']))
-        # for i in range(0,len(ret)):
-        #     video.date = dates[i]
-        return ret
-    except:
-        print(json)
-        exit()
+    # try:
+    items = json['items']
+    ret = []
+    for video in items:
+        thumbnail = ''
+        try:
+            thumbnail = video['snippet']['thumbnails']['maxres']['url']
+        except:
+            try:
+                thumbnail = video['snippet']['thumbnails']['standard']['url']
+            except:
+                thumbnail = video['snippet']['thumbnails']['default']['url']
+        print(thumbnail)
+        ret.append(Video(youtubeVidBase + video['id'], 
+            youtubeChannelBase + video['snippet']['channelId'],
+            video['id'],
+            fromISOtoSec(video['contentDetails']['duration']),
+            video['snippet']['channelTitle'],
+            video['snippet']['title'],
+            video['snippet']['categoryId'], 
+            thumbnail=thumbnail,
+            description=video['snippet']['description']))
+    return ret
+    # except:
+        # file.close()
+        # print(json)
+        # exit()
 # fetches the channel, category name, and duration in one API call
 # returns an array of Video objects
 def fetchAPIinfo(fileName) -> list[Video] :
@@ -94,9 +105,13 @@ def fetchAPIinfo(fileName) -> list[Video] :
         active = len(div('a'))
         if active > 1:
             for a in div('a'):
+                # if not (getVidIDfromURL(div('a')[0]['href']) in ids):
+                    
                 if 'watch' in a['href'] and not (getVidIDfromURL(a['href']) in ids):
                     ids.append(getVidIDfromURL(a['href']))
-            # dates.append(extractDate(div.getText()))
+                    dates.append(extractDate(div.getText()))
+            
+            # print(dates)
     base_api_url = 'https://www.googleapis.com/youtube/v3/videos?part=snippet&part=contentDetails'
     api_url = base_api_url
     beginning = time.perf_counter()
@@ -105,21 +120,25 @@ def fetchAPIinfo(fileName) -> list[Video] :
     for i in range(0,len(ids)):
         api_url += '&id=' + ids[i]
         if (i % 49 == 0 and i != 0) or i == len(ids) - 1:
-            api_url += '&key=AIzaSyAIAyNLdUumVrXStTs8IjZGcVh7xSYD2_8'
+            api_url += '&key=AIzaSyDNHNVXw6TFETWGo8kdjAP4wvszh1ti-VQ'
             response = requests.get(api_url)
             obj = response.json()
-            ret += getVideofromJSON(obj)
+            ret += getVideofromJSON(watchHistory, obj)
             end = time.perf_counter()
             elapsed_time = (end - beginning) / 60
             totalTime += elapsed_time
             averageTime = ((totalTime) / num)
             percentageLeft = (1 - (i / len(ids)) )
-            print('Estimated Time Remaining:', ((averageTime * ((percentageLeft * len(ids))/ 50))) * 60, 'seconds')
+            # print('Estimated Time Remaining:', round((averageTime * ((percentageLeft * len(ids))/ 50)), 2) * 60, 'seconds')
             beginning = time.perf_counter()
             api_url = base_api_url
             num += 1
+    for i in range(0, len(ret)):
+        ret[i].dateWatched = dates[i]
     return ret
 #write dictionary; takes file handle and array of objects
-def saveDictionaryFile(file, array):
+def saveDictionaryFile(array):
+    file = open('videos.dictionary', 'wb')
     for item in array:
         pickle.dump(item, file)
+    file.close()
