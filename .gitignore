@@ -4,3 +4,4 @@
 /videos.dictionary
 /watch-history.html
 *.pyc
+**/__pycache__/
