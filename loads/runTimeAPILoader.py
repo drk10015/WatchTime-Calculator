@@ -32,13 +32,7 @@ def fromISOtoSec(isoString) -> int:
             seconds = int(time[previousIndex:currentIndex])
         totalTime = hours + minutes + seconds
     return totalTime
-#Shift global Keysto a new one that will hopefully work
-#def shiftKeys() -> None:
-    print(keys.CURRENT_KEY)
-    keys.CURRENT_INDEX =  (keys.CURRENT_INDEX + 1) % 12
-    keys.CURRENT_KEY =  keys.API_KEYS[keys.CURRENT_INDEX]
-    if keys.CURRENT_INDEX == 0:
-        exit()
+
 #Cut out the ID for the video from the Youtube URL
 def getVidIDfromURL(urlStr) -> str:
         # print(urlStr)
@@ -69,6 +63,7 @@ def getVideofromJSON(file, json) -> Video:
     items = json['items']
     ret = []
     for video in items:
+        # print(video)
         thumbnail = ''
         try:
             thumbnail = video['snippet']['thumbnails']['maxres']['url']
@@ -77,7 +72,6 @@ def getVideofromJSON(file, json) -> Video:
                 thumbnail = video['snippet']['thumbnails']['standard']['url']
             except:
                 thumbnail = video['snippet']['thumbnails']['default']['url']
-        print(thumbnail)
         ret.append(Video(youtubeVidBase + video['id'], 
             youtubeChannelBase + video['snippet']['channelId'],
             video['id'],
@@ -95,12 +89,15 @@ def getVideofromJSON(file, json) -> Video:
 # fetches the channel, category name, and duration in one API call
 # returns an array of Video objects
 def fetchAPIinfo(fileName, window = None) -> list[Video] :
+    print('SUCCESSSSS')
+    print(fileName)
     if window:
         window.show()
         print(window)
     watchHistory = open(fileName, encoding="utf8")
     soup_strainer = SoupStrainer('div', attrs={'class':'content-cell mdl-cell mdl-cell--6-col mdl-typography--body-1'})
     doc = BeautifulSoup(watchHistory, 'html.parser', on_duplicate_attribute='ignore' ,parse_only=soup_strainer)
+    print('Out of Soup')
     ret = []
     ids = []
     dates = []
@@ -109,7 +106,6 @@ def fetchAPIinfo(fileName, window = None) -> list[Video] :
         if active > 1:
             for a in div('a'):
                 # if not (getVidIDfromURL(div('a')[0]['href']) in ids):
-                    
                 if 'watch' in a['href'] and not (getVidIDfromURL(a['href']) in ids):
                     ids.append(getVidIDfromURL(a['href']))
                     dates.append(extractDate(div.getText()))
@@ -133,9 +129,8 @@ def fetchAPIinfo(fileName, window = None) -> list[Video] :
             averageTime = ((totalTime) / num)
             percentageLeft = (1 - (i / len(ids)) )
             if window:
-                window.setTime(
-                round((averageTime * ((percentageLeft * len(ids)) / 50)), 2) * 60)
-                window.updateProgress((i / len(ids)))
+                window.worker.signals.progress.emit(int((i / len(ids)) * 100))
+                window.worker.signals.timeRemaining.emit(int((averageTime * ((percentageLeft * len(ids))/ 50)) * 60))
             # print('Estimated Time Remaining:', round((averageTime * ((percentageLeft * len(ids))/ 50)), 2) * 60, 'seconds')
             beginning = time.perf_counter()
             api_url = base_api_url
@@ -143,8 +138,9 @@ def fetchAPIinfo(fileName, window = None) -> list[Video] :
     for i in range(0, len(ret)):
         ret[i].dateWatched = dates[i]
     if window:
-        window.close()
-    return ret
+        window.worker.signals.result.emit(ret)
+    else:
+        return ret
 #write dictionary; takes file handle and array of objects
 def saveDictionaryFile(array):
     file = open('videos.dictionary', 'wb')
