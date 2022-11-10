@@ -95,12 +95,14 @@ def fetchAPIinfo(fileName, window = None) -> list[Video] :
         window.show()
         print(window)
     watchHistory = open(fileName, encoding="utf8")
+    window.worker.signals.timeRemaining.emit('Utilizing BeautifulSoup\nThis may take a moment.')
     soup_strainer = SoupStrainer('div', attrs={'class':'content-cell mdl-cell mdl-cell--6-col mdl-typography--body-1'})
     doc = BeautifulSoup(watchHistory, 'html.parser', on_duplicate_attribute='ignore' ,parse_only=soup_strainer)
     print('Out of Soup')
     ret = []
     ids = []
     dates = []
+    window.worker.signals.timeRemaining.emit('Out of Soup. Indexing...')
     for div in doc('div'):
         active = len(div('a'))
         if active > 1:
@@ -130,7 +132,7 @@ def fetchAPIinfo(fileName, window = None) -> list[Video] :
             percentageLeft = (1 - (i / len(ids)) )
             if window:
                 window.worker.signals.progress.emit(int((i / len(ids)) * 100))
-                window.worker.signals.timeRemaining.emit(int((averageTime * ((percentageLeft * len(ids))/ 50)) * 60))
+                window.worker.signals.timeRemaining.emit('Estimated Time Remaining: ' + str(int((averageTime * ((percentageLeft * len(ids))/ 50)) * 60)) + ' seconds')
             # print('Estimated Time Remaining:', round((averageTime * ((percentageLeft * len(ids))/ 50)), 2) * 60, 'seconds')
             beginning = time.perf_counter()
             api_url = base_api_url

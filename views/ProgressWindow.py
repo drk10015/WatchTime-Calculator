@@ -2,7 +2,7 @@ import pathlib
 from PyQt6 import uic
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
-from PyQt6.QtWidgets import QDialog
+from PyQt6.QtWidgets import QDialog, QDialogButtonBox
 from utils.asyncU.Workers import Worker
 from loads.runTimeAPILoader import fetchAPIinfo, saveDictionaryFile
 from views.MainWindowClass import MainWindow
@@ -14,26 +14,27 @@ class ProgressWindow(QDialog):
         qt_creator_file3 = str(self.CURRENT_PATH)[:-5] + "/ui/progressWindow.ui"
         uic.loadUi(qt_creator_file3, self)
         self.loadLink = loadLink
-        self.buttonBox.clicked.connect(self.begin)
         self.threadpool = QThreadPool()
         self.worker = Worker(self.begin)
         self.worker.signals.progress.connect(self.updateProgress)
         self.worker.signals.timeRemaining.connect(self.setTime)
         self.worker.signals.finished.connect(self.end)
         self.worker.signals.result.connect(self.returnedResult)
+        self.progressBar.setRange(0,0)
+        self.buttonBox.buttons()[0].clicked.connect(self.canceled)
         self.threadpool.start(self.worker)
         self.show()
 
-    def setTime(self, remainingTime: float):
-        self.etaLabel.setText('Estimated Time Remaining: ' + str(remainingTime) + ' seconds')
+    def setTime(self, message: str):
+        self.etaLabel.setText(message)
     
     def updateProgress(self, percentage):
-        print('My percentage = ', str(percentage))
+        if self.progressBar.maximum() == 0:
+            self.progressBar.setRange(0,100)
         self.progressBar.setValue(percentage)
     
     def begin(self):
-        self.usersVideos = fetchAPIinfo(self.loadLink, self)
-        print(self.usersVideos)
+        fetchAPIinfo(self.loadLink, self)
     
     def end(self):
         saveDictionaryFile(self.usersVideos)
@@ -45,3 +46,6 @@ class ProgressWindow(QDialog):
         print(self.usersVideos)
         self.worker.signals.finished.emit()
         
+    def canceled(self):
+        self.close()
+        exit(1)
