@@ -2,6 +2,7 @@ import sys, pathlib
 from PyQt6 import uic
 from PyQt6.QtWidgets import QApplication, QMainWindow, QListWidgetItem
 from views.DetailWindow import DetailWindow
+from views.SortWindow import SortWindow
 
 
 class MainWindow(QMainWindow):
@@ -10,10 +11,11 @@ class MainWindow(QMainWindow):
         self.CURRENT_PATH = pathlib.Path(__file__).parent.resolve()
         qt_creator_file3 = str(self.CURRENT_PATH)[:-5] + "/ui/mainVideoList.ui"
         uic.loadUi(qt_creator_file3, self)
-        self.PERMANENT = []
+        self.arr = arr
+        self.data = []
         for vid in arr:
-            self.PERMANENT.append([QListWidgetItem(vid.videoName), vid])
-        self.data = self.PERMANENT
+            self.data.append([QListWidgetItem(vid.videoName), vid])
+        self.sortButton.clicked.connect(self.sortDialog)
         self.searchBar.textEdited.connect(self.search)
         for couple in self.data:
             self.videoView.addItem(couple[0])
@@ -21,7 +23,7 @@ class MainWindow(QMainWindow):
         self.show()
         
     def search(self, it):
-        for item in self.PERMANENT:
+        for item in self.data:
             if not it.lower() in item[0].text().lower():
                 item[0].setHidden(True)
             else:
@@ -35,6 +37,9 @@ class MainWindow(QMainWindow):
         for couple in self.data:
             if couple[0] == item:
                 return couple[1]
+    
+    def sortDialog(self):
+        self.dialogW = SortWindow(self)
     
     
 

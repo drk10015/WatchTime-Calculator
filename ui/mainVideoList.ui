@@ -23,16 +23,67 @@
       <height>21</height>
      </rect>
     </property>
+    <property name="placeholderText">
+     <string>Search</string>
+    </property>
    </widget>
    <widget class="QListWidget" name="videoView">
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>20</y>
+      <y>40</y>
       <width>801</width>
       <height>541</height>
      </rect>
     </property>
+   </widget>
+   <widget class="QDialogButtonBox" name="buttonBox">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>20</y>
+      <width>801</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="standardButtons">
+     <set>QDialogButtonBox::NoButton</set>
+    </property>
+    <property name="centerButtons">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>20</y>
+      <width>801</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="sortButton">
+       <property name="text">
+        <string>Sort</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -41,7 +92,7 @@
      <x>0</x>
      <y>0</y>
      <width>801</width>
-     <height>37</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
