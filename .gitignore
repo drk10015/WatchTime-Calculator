@@ -2,6 +2,6 @@
 /config.dictionary
 /__pycache__
 /videos.dictionary
-/watch-history.html
+/loads/watch-history.html
 *.pyc
 **/__pycache__/
