@@ -1,7 +1,7 @@
 import sys, pathlib
 from PyQt6 import uic
 from PyQt6.QtWidgets import QApplication, QDialog, QListWidgetItem
-import operator
+import operator, datetime
 
 
 class SortWindow(QDialog):
@@ -33,46 +33,39 @@ class SortWindow(QDialog):
 
     def dateClicked(self):
         self.comboBox.clear()
-        self.comboBox.addItems(['Date Watched (low to high)', 'Date Watched (high to low)'])
+        self.comboBox.addItems(['Date Watched (recent to furthest)','Date Watched (furthest to recent)'])
 
     def submitClicked(self):
-        if self.durationButton.isChecked():
-            newData = sorted(self.mainWind.arr, key=operator.attrgetter('duration'), reverse=self.comboBox.currentIndex())
-            self.mainWind.data = newData
-            self.mainWind.videoView.clear()
+        if self.mainWind.videoButton.isChecked():
             ret = []
-            for vid in newData:
-                ret.append([QListWidgetItem(vid.videoName), vid])
-            for couple in ret:
-                self.mainWind.videoView.addItem(couple[0])
-            self.mainWind.data = ret
-        elif self.channelButton.isChecked():
-            newData = sorted(self.mainWind.arr, key=operator.attrgetter('channelName'), reverse=self.comboBox.currentIndex())
-            self.mainWind.data = newData
-            self.mainWind.videoView.clear()
-            ret = []
-            for vid in newData:
-                ret.append([QListWidgetItem(vid.channelName + ' - ' + vid.videoName), vid])
-            for couple in ret:
-                self.mainWind.videoView.addItem(couple[0])
-            self.mainWind.data = ret
-        elif self.videoButton.isChecked():
-            newData = sorted(self.mainWind.arr, key=operator.attrgetter('videoName'), reverse=self.comboBox.currentIndex())
-            self.mainWind.data = newData
-            self.mainWind.videoView.clear()
-            ret = []
-            for vid in newData:
-                ret.append([QListWidgetItem(vid.videoName), vid])
-            for couple in ret:
-                self.mainWind.videoView.addItem(couple[0])
-            self.mainWind.data = ret
-        elif self.dateButton.isChecked():
-            if self.comboBox.currentText()[:12] == 'Date Watched':
-                newData = sorted(self.mainWind.arr, key=lambda x : x.getDateCode(), reverse=self.comboBox.currentIndex() % 2)
-                self.mainWind.data = newData
+            if self.durationButton.isChecked():
+                newData = sorted(self.mainWind.arr, key=operator.attrgetter('duration'), reverse=self.comboBox.currentIndex())
                 self.mainWind.videoView.clear()
-                ret = []
                 for vid in newData:
-                    ret.append([QListWidgetItem(vid.dateWatched + ' - ' + vid.videoName), vid])
+                    ret.append([QListWidgetItem(str(datetime.timedelta(seconds=vid.duration)) + ' - ' + vid.videoName), vid])
                 for couple in ret:
                     self.mainWind.videoView.addItem(couple[0])
+            elif self.channelButton.isChecked():
+                newData = sorted(self.mainWind.arr, key=operator.attrgetter('channelName'), reverse=self.comboBox.currentIndex())
+                self.mainWind.videoView.clear()
+                for vid in newData:
+                    ret.append([QListWidgetItem(vid.channelName + ' - ' + vid.videoName), vid])
+                for couple in ret:
+                    self.mainWind.videoView.addItem(couple[0])
+            elif self.videoButton.isChecked():
+                newData = sorted(self.mainWind.arr, key=operator.attrgetter('videoName'), reverse=self.comboBox.currentIndex())
+                self.mainWind.videoView.clear()
+                for vid in newData:
+                    ret.append([QListWidgetItem(vid.videoName), vid])
+                for couple in ret:
+                    self.mainWind.videoView.addItem(couple[0])
+            elif self.dateButton.isChecked():
+                if self.comboBox.currentText()[:12] == 'Date Watched':
+                    newData = sorted(self.mainWind.arr, key=lambda x:x.getDateCode(), reverse=not(self.comboBox.currentIndex() % 2))
+                    self.mainWind.videoView.clear()
+                    for vid in newData:
+                        ret.append([QListWidgetItem(vid.dateWatched + ' - ' + vid.videoName), vid])
+                    for couple in ret:
+                        self.mainWind.videoView.addItem(couple[0])
+            self.mainWind.data = ret
+            self.mainWind.categoryChanged()

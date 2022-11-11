@@ -19,7 +19,7 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>801</width>
+      <width>641</width>
       <height>21</height>
      </rect>
     </property>
@@ -31,9 +31,9 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>40</y>
+      <y>50</y>
       <width>801</width>
-      <height>541</height>
+      <height>531</height>
      </rect>
     </property>
    </widget>
@@ -59,10 +59,30 @@
       <x>0</x>
       <y>20</y>
       <width>801</width>
-      <height>25</height>
+      <height>31</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QRadioButton" name="videoButton">
+       <property name="text">
+        <string>Videos</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="channelButton">
+       <property name="text">
+        <string>Channels</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_2"/>
+     </item>
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -78,12 +98,28 @@
      </item>
      <item>
       <widget class="QPushButton" name="sortButton">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
         <string>Sort</string>
        </property>
       </widget>
      </item>
     </layout>
+   </widget>
+   <widget class="QComboBox" name="comboBox">
+    <property name="geometry">
+     <rect>
+      <x>640</x>
+      <y>0</y>
+      <width>161</width>
+      <height>21</height>
+     </rect>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
