@@ -1,15 +1,13 @@
-import pathlib, traceback, sys, time
+import pathlib
+
 from PyQt6 import uic
-from PyQt6.QtGui import *
 from PyQt6.QtCore import *
+from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
+
 from loads.offlineLoader import loadAll
-from loads.runTimeAPILoader import fetchAPIinfo
-from views.ProgressWindow import ProgressWindow
 from views.MainWindowClass import MainWindow
-
-
-
+from views.ProgressWindow import ProgressWindow
 
 class LoadingWindow(QMainWindow):
     def __init__(self) -> None:
@@ -20,7 +18,7 @@ class LoadingWindow(QMainWindow):
         self.show()
         self.onlineLoadButton.clicked.connect(self.onlineLoad)
         self.offlineLoadButton.clicked.connect(self.offlineLoad)
-    
+
     def onlineLoad(self):
         self.onlineFileName = QFileDialog.getOpenFileName(self, 'Open file', str(self.CURRENT_PATH), filter= 'html(*.html)')[0]
         if self.onlineFileName[0]:
@@ -35,5 +33,3 @@ class LoadingWindow(QMainWindow):
             print(self.onlineFileName[0])
             self.m = MainWindow(loadAll(self.onlineFileName[0]))
             self.close()
-
-

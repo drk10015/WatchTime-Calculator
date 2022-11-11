@@ -1,8 +1,11 @@
-from models.Video import *
-from bs4 import BeautifulSoup, SoupStrainer
-import time
-import requests
 import pickle
+import time
+
+import requests
+from bs4 import BeautifulSoup, SoupStrainer
+
+from models.Video import *
+
 #Change String from ISO (YouTube) format to Seconds (Int)
 def fromISOtoSec(isoString) -> int:
     #Reserved for future use
@@ -32,7 +35,6 @@ def fromISOtoSec(isoString) -> int:
             seconds = int(time[previousIndex:currentIndex])
         totalTime = hours + minutes + seconds
     return totalTime
-
 #Cut out the ID for the video from the Youtube URL
 def getVidIDfromURL(urlStr) -> str:
         # print(urlStr)
@@ -59,41 +61,37 @@ def attachDateToObj(id, dict, date) -> None:
 def getVideofromJSON(file, json) -> Video:
     youtubeVidBase = "https://www.youtube.com/watch?v="
     youtubeChannelBase = "https://www.youtube.com/channel/"
-    # try:
-    items = json['items']
-    ret = []
-    for video in items:
-        # print(video)
-        thumbnail = ''
-        try:
-            thumbnail = video['snippet']['thumbnails']['maxres']['url']
-        except:
+    try:
+        items = json['items']
+        ret = []
+        for video in items:
+            thumbnail = ''
             try:
-                thumbnail = video['snippet']['thumbnails']['standard']['url']
+                thumbnail = video['snippet']['thumbnails']['maxres']['url']
             except:
-                thumbnail = video['snippet']['thumbnails']['default']['url']
-        ret.append(Video(youtubeVidBase + video['id'], 
-            youtubeChannelBase + video['snippet']['channelId'],
-            video['id'],
-            fromISOtoSec(video['contentDetails']['duration']),
-            video['snippet']['channelTitle'],
-            video['snippet']['title'],
-            video['snippet']['categoryId'], 
-            thumbnail=thumbnail,
-            description=video['snippet']['description']))
-    return ret
-    # except:
-        # file.close()
-        # print(json)
-        # exit()
+                try:
+                    thumbnail = video['snippet']['thumbnails']['standard']['url']
+                except:
+                    thumbnail = video['snippet']['thumbnails']['default']['url']
+            ret.append(Video(youtubeVidBase + video['id'], 
+                youtubeChannelBase + video['snippet']['channelId'],
+                video['id'],
+                fromISOtoSec(video['contentDetails']['duration']),
+                video['snippet']['channelTitle'],
+                video['snippet']['title'],
+                video['snippet']['categoryId'], 
+                thumbnail=thumbnail,
+                description=video['snippet']['description']))
+        return ret
+    except:
+        file.close()
+        print(json)
+        exit()
 # fetches the channel, category name, and duration in one API call
 # returns an array of Video objects
 def fetchAPIinfo(fileName, window = None) -> list[Video] :
-    print('SUCCESSSSS')
-    print(fileName)
     if window:
         window.show()
-        print(window)
     watchHistory = open(fileName, encoding="utf8")
     window.worker.signals.timeRemaining.emit('Utilizing BeautifulSoup\nThis may take a moment.')
     soup_strainer = SoupStrainer('div', attrs={'class':'content-cell mdl-cell mdl-cell--6-col mdl-typography--body-1'})

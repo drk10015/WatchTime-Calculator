@@ -1,4 +1,4 @@
-
+import datetime as dt
 class Video:
     def __init__(self, videoURL: str, channelURL: str, id: str = None, duration: int = None, channelName: str = None, videoName: str = None, category: str = None, date: str = None, thumbnail: str = None, description: str = None,) -> None:
         # self.title = title
@@ -20,3 +20,24 @@ class Video:
 
     def getChannelID(self, url) -> str:
         return url[url.index('channel/') + 8:]
+    
+    def getDateCode(self)-> dt.datetime:
+        date = self.dateWatched.split(' ')
+        arr=['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        month = day = year = hour = minute = second = 0
+        for m in arr:
+            if date[0] == m:
+                month = arr.index(m) + 1
+        day = int(date[1][:-1])
+        year = int(date[2][:-1])
+        time = date[3].split(':')
+        hour = int(time[0])
+        if date[4] == 'PM':
+            hour += 12
+        minute = int(time[1])
+        second = int(time[2])
+        datetime_object = dt.datetime(year, month, day, hour - 1, minute, second)
+        epoch = dt.datetime(1970,1,1)
+        delta = (datetime_object - epoch)
+        return delta.total_seconds()
+        
