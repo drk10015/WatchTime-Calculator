@@ -56,6 +56,7 @@ class MainWindow(QMainWindow):
         for couple in self.data:
             self.videoView.addItem(couple[0])
         self.comboBox.clear()
+        self.comboBox.addItems(['Channel', 'Duration - Channel'])
 
     def videoMode(self):
         self.data = []
@@ -64,6 +65,8 @@ class MainWindow(QMainWindow):
         self.videoView.clear()
         for couple in self.data:
             self.videoView.addItem(couple[0])
+        self.comboBox.clear()
+        self.comboBox.addItems(['Date - Video (Short)', 'Date - Video (Long)', 'Duration - Video', 'Channel - Video', 'Video - Channel'])
     
     def categoryChanged(self):
         selectedOption = self.comboBox.currentText()
@@ -122,7 +125,28 @@ class MainWindow(QMainWindow):
             for couple in ret:
                 self.videoView.addItem(couple[0])
             self.data = ret
-    
+        elif selectedOption == 'Channel':
+            channels = []
+            newData = sorted(self.arr, key=operator.attrgetter('channelName'), reverse=False)
+            self.data = []
+            for item in newData:
+                if not item.channelName in channels:
+                    self.data.append([QListWidgetItem(item.channelName), item])
+                    channels.append(item.channelName)
+            self.videoView.clear()
+            for couple in self.data:
+                self.videoView.addItem(couple[0])
+        elif selectedOption == 'Duration - Channel':
+            channels = []
+            newData = sorted(self.arr, key=operator.attrgetter('channelName'), reverse=False)
+            self.data = []
+            for item in newData:
+                if not item.channelName in channels:
+                    self.data.append([QListWidgetItem(str(datetime.timedelta(seconds=vid.duration)) + ' - ' + item.channelName), item])
+                    channels.append(item.channelName)
+            self.videoView.clear()
+            for couple in self.data:
+                self.videoView.addItem(couple[0])
 
 
 
