@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import QDialog, QDialogButtonBox
 from utils.asyncU.Workers import Worker
 from loads.runTimeAPILoader import fetchAPIinfo, saveDictionaryFile
 from views.MainWindowClass import MainWindow
+from models.User import User
 
 class ProgressWindow(QDialog):
     def __init__(self, loadLink) -> None:
@@ -37,13 +38,13 @@ class ProgressWindow(QDialog):
         fetchAPIinfo(self.loadLink, self)
     
     def end(self):
-        saveDictionaryFile(self.usersVideos)
-        self.m = MainWindow(self.usersVideos)
+        saveDictionaryFile('user.dictionary', self.user.videos)
+        self.m = MainWindow(self.user)
         self.close()
         
-    def returnedResult(self, vids):
-        self.usersVideos = vids
-        print(self.usersVideos)
+    def returnedResult(self, user: User):
+        self.user = user
+        print(self.user)
         self.worker.signals.finished.emit()
         
     def canceled(self):

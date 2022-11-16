@@ -15,9 +15,9 @@ LOADED = False
 usersVideos = []
 app = QApplication(sys.argv)
 window = None
-if 'videos.dictionary' in CURRENT_FILES:
+if 'user.dictionary' in CURRENT_FILES:
     try:
-        usersVideos = loadAll(str(CURRENT_DIRECTORY) + '/videos.dictionary')
+        usersVideos = loadAll(str(CURRENT_DIRECTORY) + '/users.dictionary')
         LOADED = True
         window = MainWindow(usersVideos)
     except:

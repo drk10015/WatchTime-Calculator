@@ -3,16 +3,17 @@ from PyQt6 import uic
 from PyQt6.QtWidgets import QApplication, QMainWindow, QListWidgetItem
 from views.DetailWindow import DetailWindow
 from views.SortWindow import SortWindow
+from models.User import User
 import datetime, operator
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, arr) -> None:
+    def __init__(self, user:User) -> None:
         QMainWindow.__init__(self)
         self.CURRENT_PATH = pathlib.Path(__file__).parent.resolve()
         qt_creator_file3 = str(self.CURRENT_PATH)[:-5] + "/ui/mainVideoList.ui"
         uic.loadUi(qt_creator_file3, self)
-        self.arr = arr
+        self.arr = user.videos
         self.data = []
         self.comboBox.addItems(['Date - Video (Short)', 'Date - Video (Long)', 'Duration - Video', 'Channel - Video', 'Video - Channel'])
         self.sortButton.clicked.connect(self.sortDialog)
@@ -142,7 +143,7 @@ class MainWindow(QMainWindow):
             self.data = []
             for item in newData:
                 if not item.channelName in channels:
-                    self.data.append([QListWidgetItem(str(datetime.timedelta(seconds=vid.duration)) + ' - ' + item.channelName), item])
+                    self.data.append([QListWidgetItem(str(datetime.timedelta(seconds=item.duration)) + ' - ' + item.channelName), item])
                     channels.append(item.channelName)
             self.videoView.clear()
             for couple in self.data:
