@@ -59,7 +59,7 @@ def attachDateToObj(id, dict, date) -> None:
         if obj.id == id:
             obj.date = date
 #Creates a video object from the decoded json
-def getVideofromJSON(file, vjson) -> Video:
+def getVideofromJSON(file, vjson) -> list[Video]:
     youtubeVidBase = "https://www.youtube.com/watch?v="
     try:
         vitems = vjson['items']
@@ -89,7 +89,7 @@ def getVideofromJSON(file, vjson) -> Video:
         exit()
         
 #Creates a video object from the decoded json
-def getChannelfromJSON(file, vjson) -> Video:
+def getChannelfromJSON(file, vjson) -> list[Channel]:
     youtubeChannelBase = "https://www.youtube.com/channel/"
     try:
         citems = vjson['items']
@@ -157,8 +157,8 @@ def fetchAPIinfo(fileName, window = None) -> list[Video] :
             channel_api_url += '&key=AIzaSyDNHNVXw6TFETWGo8kdjAP4wvszh1ti-VQ'
             response = requests.get(video_api_url)
             vidobj = response.json()
-            if i < len(channelIds):
-                chanobj = requests.get(channel_api_url)
+            if i < len(channelIds) or '&id=' in channel_api_url:
+                response = requests.get(channel_api_url)
                 chanobj = response.json()
                 current.channels += getChannelfromJSON(watchHistory, chanobj)
             current.videos += getVideofromJSON(watchHistory, vidobj)
@@ -175,22 +175,28 @@ def fetchAPIinfo(fileName, window = None) -> list[Video] :
             video_api_url = video_base_api_url
             channel_api_url = channel_base_api_url
             num += 1
+    if '&id=' in video_api_url:
+        video_api_url += '&key=AIzaSyDNHNVXw6TFETWGo8kdjAP4wvszh1ti-VQ'
+        response = requests.get(video_api_url)
+        vidobj = response.json()
+        current.videos += getVideofromJSON(watchHistory, vidobj)
+    if '&id=' in channel_api_url:
+        channel_api_url += '&key=AIzaSyDNHNVXw6TFETWGo8kdjAP4wvszh1ti-VQ'
+        response = requests.get(channel_api_url)
+        chanobj = response.json()
+        current.channels += getChannelfromJSON(watchHistory, chanobj)
     print(str(len(vidIds)))
     print(str(len(channelIds)))
     for vid in current.videos:
-        for channel in current.channels:
-            if channel.id == vid.id:
-                channel.channelVids.append(vid)
-                break
-    for i in range(0, len(vret)):
-        vret[i].dateWatched = dates[i]
+        vid.getChannelObject(current.channels).channelVids.append(vid)
+    print(str(len(vret)))
+    for i in range(0, len(current.videos)):
+        current.videos[i].dateWatched = dates[i]
     if window:
         window.worker.signals.result.emit(current)
     else:
         return current
 #write dictionary; takes file name and array of objects
-def saveDictionaryFile(filename, array):
+def saveDictionaryFile(filename, item):
     file = open(filename, 'wb')
-    for item in array:
-        pickle.dump(item, file)
-    file.close()
+    pickle.dump(item, file)

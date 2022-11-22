@@ -46,10 +46,10 @@ class SortWindow(QDialog):
                 for couple in ret:
                     self.mainWind.videoView.addItem(couple[0])
             elif self.channelButton.isChecked():
-                newData = sorted(self.mainWind.arr, key=operator.attrgetter('channelName'), reverse=self.comboBox.currentIndex())
+                newData = sorted(self.mainWind.arr, key=lambda video: video.getChannelObject(self.mainWind.user.channels).channelTitle, reverse=self.comboBox.currentIndex())
                 self.mainWind.videoView.clear()
                 for vid in newData:
-                    ret.append([QListWidgetItem(vid.channelName + ' - ' + vid.videoName), vid])
+                    ret.append([QListWidgetItem(vid.getChannelObject(self.mainWind.user.channels).channelTitle + ' - ' + vid.videoName), vid])
                 for couple in ret:
                     self.mainWind.videoView.addItem(couple[0])
             elif self.videoButton.isChecked():

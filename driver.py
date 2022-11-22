@@ -16,12 +16,14 @@ usersVideos = []
 app = QApplication(sys.argv)
 window = None
 if 'user.dictionary' in CURRENT_FILES:
-    try:
-        usersVideos = loadAll(str(CURRENT_DIRECTORY) + '/users.dictionary')
-        LOADED = True
-        window = MainWindow(usersVideos)
-    except:
-        pass
+    # try:
+    user = loadAll(str(CURRENT_DIRECTORY) + '/user.dictionary')
+    print(user)
+    print('done with load')
+    LOADED = True
+    window = MainWindow(user)
+    # except:
+        # pass
 if not LOADED and 'watch-history.html' in CURRENT_FILES:
     try: 
         window = ProgressWindow(str(CURRENT_DIRECTORY) + '/watch-history.html')
@@ -30,5 +32,5 @@ if not LOADED and 'watch-history.html' in CURRENT_FILES:
         print('Error loading online, resorting to manual user load...')
 if not LOADED:
     window = LoadingWindow()
-
+window.show()
 app.exec()

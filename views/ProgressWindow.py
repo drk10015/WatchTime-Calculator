@@ -38,13 +38,12 @@ class ProgressWindow(QDialog):
         fetchAPIinfo(self.loadLink, self)
     
     def end(self):
-        saveDictionaryFile('user.dictionary', self.user.videos)
+        saveDictionaryFile('user.dictionary', self.user)
         self.m = MainWindow(self.user)
         self.close()
         
     def returnedResult(self, user: User):
         self.user = user
-        print(self.user)
         self.worker.signals.finished.emit()
         
     def canceled(self):

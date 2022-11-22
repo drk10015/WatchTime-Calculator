@@ -3,6 +3,7 @@ from PyQt6 import uic
 from PyQt6.QtWidgets import QApplication, QMainWindow, QListWidgetItem
 from views.DetailWindow import DetailWindow
 from views.SortWindow import SortWindow
+from views.ChannelDetailWindow import ChannelDetailWindow
 from models.User import User
 import datetime, operator
 
@@ -13,7 +14,9 @@ class MainWindow(QMainWindow):
         self.CURRENT_PATH = pathlib.Path(__file__).parent.resolve()
         qt_creator_file3 = str(self.CURRENT_PATH)[:-5] + "/ui/mainVideoList.ui"
         uic.loadUi(qt_creator_file3, self)
+        self.user = user
         self.arr = user.videos
+        self.channels = user.channels
         self.data = []
         self.comboBox.addItems(['Date - Video (Short)', 'Date - Video (Long)', 'Duration - Video', 'Channel - Video', 'Video - Channel'])
         self.sortButton.clicked.connect(self.sortDialog)
@@ -24,6 +27,7 @@ class MainWindow(QMainWindow):
         self.comboBox.currentTextChanged.connect(self.categoryChanged)
         self.channelButton.clicked.connect(self.channelMode)
         self.videoButton.clicked.connect(self.videoMode)
+    
     def search(self, it):
         for item in self.data:
             if self.videoButton.isChecked():
@@ -31,10 +35,17 @@ class MainWindow(QMainWindow):
                     item[0].setHidden(True)
                 else:
                     item[0].setHidden(False)
-
+            elif self.channelButton.isChecked():
+                if not (it.lower() in item[0].text().lower()):
+                    item[0].setHidden(True)
+                else:
+                    item[0].setHidden(False)
     def itemDoubleClicked(self, item):
         if self.videoButton.isChecked():
-            self.second = DetailWindow(self.getObjectFromItem(item))
+            self.second = DetailWindow(self, self.getObjectFromItem(item))
+            self.second.show()
+        if self.channelButton.isChecked():
+            self.second = ChannelDetailWindow(self, self.getObjectFromItem(item))
             self.second.show()
 
     def getObjectFromItem(self, item):
@@ -46,16 +57,6 @@ class MainWindow(QMainWindow):
         self.dialogW = SortWindow(self)
     
     def channelMode(self):
-        channels = []
-        newData = sorted(self.arr, key=operator.attrgetter('channelName'), reverse=False)
-        self.data = []
-        for item in newData:
-            if not item.channelName in channels:
-                self.data.append([QListWidgetItem(item.channelName), item])
-                channels.append(item.channelName)
-        self.videoView.clear()
-        for couple in self.data:
-            self.videoView.addItem(couple[0])
         self.comboBox.clear()
         self.comboBox.addItems(['Channel', 'Duration - Channel'])
 
@@ -110,7 +111,7 @@ class MainWindow(QMainWindow):
             for i in self.data:
                 newData.append(i[1])
             for vid in newData:
-                ret.append([QListWidgetItem(vid.videoName + ' - ' + vid.channelName), vid])
+                ret.append([QListWidgetItem(vid.videoName + ' - ' + vid.getChannelObject(self.user.channels).channelTitle), vid])
             self.videoView.clear()
             for couple in ret:
                 self.videoView.addItem(couple[0])
@@ -121,36 +122,33 @@ class MainWindow(QMainWindow):
             for i in self.data:
                 newData.append(i[1])
             for vid in newData:
-                ret.append([QListWidgetItem(vid.channelName + ' - ' + vid.videoName), vid])
+                ret.append([QListWidgetItem(vid.getChannelObject(self.user.channels).channelTitle + ' - ' + vid.videoName), vid])
             self.videoView.clear()
             for couple in ret:
                 self.videoView.addItem(couple[0])
             self.data = ret
         elif selectedOption == 'Channel':
             channels = []
-            newData = sorted(self.arr, key=operator.attrgetter('channelName'), reverse=False)
+            newData = sorted(self.channels, key=lambda channel: channel.channelTitle, reverse=False)
             self.data = []
-            for item in newData:
-                if not item.channelName in channels:
-                    self.data.append([QListWidgetItem(item.channelName), item])
-                    channels.append(item.channelName)
+            for channel in newData:
+                if not channel.channelTitle in channels:
+                    self.data.append([QListWidgetItem(channel.channelTitle), channel])
+                    channels.append(channel.channelTitle)
             self.videoView.clear()
             for couple in self.data:
                 self.videoView.addItem(couple[0])
         elif selectedOption == 'Duration - Channel':
             channels = []
-            newData = sorted(self.arr, key=operator.attrgetter('channelName'), reverse=False)
+            newData = sorted(self.arr, key=lambda video: video.getChannelObject(self.user.channels).channelTitle, reverse=False)
             self.data = []
             for item in newData:
-                if not item.channelName in channels:
-                    self.data.append([QListWidgetItem(str(datetime.timedelta(seconds=item.duration)) + ' - ' + item.channelName), item])
-                    channels.append(item.channelName)
+                if not item.getChannelObject(self.user.channels).channelTitle in channels:
+                    self.data.append([QListWidgetItem(str(datetime.timedelta(seconds=item.getChannelObject(self.user.channels).getDuration())) + ' - ' + item.getChannelObject(self.user.channels).channelTitle), item])
+                    channels.append(item.getChannelObject(self.user.channels).channelTitle)
             self.videoView.clear()
             for couple in self.data:
                 self.videoView.addItem(couple[0])
-
-
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
