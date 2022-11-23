@@ -18,8 +18,6 @@ window = None
 if 'user.dictionary' in CURRENT_FILES:
     # try:
     user = loadAll(str(CURRENT_DIRECTORY) + '/user.dictionary')
-    print(user)
-    print('done with load')
     LOADED = True
     window = MainWindow(user)
     # except:

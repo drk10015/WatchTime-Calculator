@@ -124,7 +124,6 @@ def fetchAPIinfo(fileName, window = None) -> list[Video] :
     window.worker.signals.timeRemaining.emit('Utilizing BeautifulSoup\nThis may take a moment.')
     soup_strainer = SoupStrainer('div', attrs={'class':'content-cell mdl-cell mdl-cell--6-col mdl-typography--body-1'})
     doc = BeautifulSoup(watchHistory, 'html.parser', on_duplicate_attribute='ignore' ,parse_only=soup_strainer)
-    print('Out of Soup')
     vret = []
     vidIds = []
     channelIds = []
@@ -185,11 +184,8 @@ def fetchAPIinfo(fileName, window = None) -> list[Video] :
         response = requests.get(channel_api_url)
         chanobj = response.json()
         current.channels += getChannelfromJSON(watchHistory, chanobj)
-    print(str(len(vidIds)))
-    print(str(len(channelIds)))
     for vid in current.videos:
         vid.getChannelObject(current.channels).channelVids.append(vid)
-    print(str(len(vret)))
     for i in range(0, len(current.videos)):
         current.videos[i].dateWatched = dates[i]
     if window:
