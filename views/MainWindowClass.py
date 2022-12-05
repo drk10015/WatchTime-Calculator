@@ -3,6 +3,7 @@ from PyQt6 import uic
 from PyQt6.QtWidgets import QApplication, QMainWindow, QListWidgetItem
 from views.DetailWindow import DetailWindow
 from views.SortWindow import SortWindow
+from views.FilterWindow import FilterWindow
 from views.ChannelDetailWindow import ChannelDetailWindow
 from models.User import User
 import datetime, operator
@@ -40,6 +41,7 @@ class MainWindow(QMainWindow):
                     item[0].setHidden(True)
                 else:
                     item[0].setHidden(False)
+
     def itemDoubleClicked(self, item):
         if self.videoButton.isChecked():
             self.second = DetailWindow(self, self.getObjectFromItem(item))
@@ -55,6 +57,9 @@ class MainWindow(QMainWindow):
     
     def sortDialog(self):
         self.dialogW = SortWindow(self)
+        
+    def filterDialog(self):
+        self.filterD = FilterWindow(self)
     
     def channelMode(self):
         self.data = []
@@ -62,7 +67,7 @@ class MainWindow(QMainWindow):
         for channel in channels:
             self.data.append([QListWidgetItem(channel.channelTitle), channel])
         self.comboBox.clear()
-        self.comboBox.addItems(['Channel', 'Duration - Channel'])
+        self.comboBox.addItems(['Channel', 'Duration - Channel', 'Total Videos - Channel'])
 
     def videoMode(self):
         self.data = []
@@ -151,6 +156,17 @@ class MainWindow(QMainWindow):
                     newData.append(i[1])
                 for channel in newData:
                     ret.append([QListWidgetItem(str(datetime.timedelta(seconds=channel.getDuration())) + ' - ' + channel.channelTitle), channel])
+                self.videoView.clear()
+                for couple in ret:
+                    self.videoView.addItem(couple[0])
+                self.data = ret
+            elif selectedOption == 'Total Videos - Channel':
+                newData = []
+                ret = []
+                for i in self.data:
+                    newData.append(i[1])
+                for channel in newData:
+                    ret.append([QListWidgetItem(str(len(channel.channelVids)) + ' - ' + channel.channelTitle), channel])
                 self.videoView.clear()
                 for couple in ret:
                     self.videoView.addItem(couple[0])
