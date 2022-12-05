@@ -12,5 +12,4 @@ class FilterWindow(QDialog):
         uic.loadUi(qt_creator_file3, self)
         self.mainWind = mainWind
         self.yearLabel.setText(self.comboBox.currentText() + ' Year Recap')
-        self.totalVideoLabel = 
         self.show()
