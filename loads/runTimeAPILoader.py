@@ -192,6 +192,11 @@ def fetchAPIinfo(fileName, window = None) -> list[Video] :
         window.worker.signals.result.emit(current)
     else:
         return current
+    for channel in current.channels:
+        if len(channel.channelVids) == 0:
+            current.channels.remove(channel)
+        else:
+            channel.channelVids = sorted(channel.channelVids, key=lambda channel: channel.getDateCode(), reverse=True)
 #write dictionary; takes file name and array of objects
 def saveDictionaryFile(filename, item):
     file = open(filename, 'wb')

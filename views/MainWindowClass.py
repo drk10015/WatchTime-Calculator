@@ -57,6 +57,10 @@ class MainWindow(QMainWindow):
         self.dialogW = SortWindow(self)
     
     def channelMode(self):
+        self.data = []
+        channels = sorted(self.channels, key=operator.attrgetter('channelTitle'))
+        for channel in channels:
+            self.data.append([QListWidgetItem(channel.channelTitle), channel])
         self.comboBox.clear()
         self.comboBox.addItems(['Channel', 'Duration - Channel'])
 
@@ -72,83 +76,85 @@ class MainWindow(QMainWindow):
     
     def categoryChanged(self):
         selectedOption = self.comboBox.currentText()
-        if selectedOption == 'Date - Video (Short)':
-            newData = []
-            for i in self.data:
-                newData.append(i[1])
-            ret = []
-            for vid in newData:
-                ret.append([QListWidgetItem(vid.dateWatched[:12] + ' - ' + vid.videoName), vid])
-            self.videoView.clear()
-            for couple in ret:
-                self.videoView.addItem(couple[0])
-            self.data = ret
-        elif selectedOption == 'Date - Video (Long)':
-            newData = []
-            ret = []
-            for i in self.data:
-                newData.append(i[1])
-            for vid in newData:
-                ret.append([QListWidgetItem(vid.dateWatched + ' - ' + vid.videoName), vid])
-            self.videoView.clear()
-            for couple in ret:
-                self.videoView.addItem(couple[0])
-            self.data = ret
-        elif selectedOption == 'Duration - Video':
-            newData = []
-            ret = []
-            for i in self.data:
-                newData.append(i[1])
-            for vid in newData:
-                ret.append([QListWidgetItem(str(datetime.timedelta(seconds=vid.duration)) + ' - ' + vid.videoName), vid])
-            self.videoView.clear()
-            for couple in ret:
-                self.videoView.addItem(couple[0])
-            self.data = ret
-        elif selectedOption == 'Video - Channel':
-            newData = []
-            ret = []
-            for i in self.data:
-                newData.append(i[1])
-            for vid in newData:
-                ret.append([QListWidgetItem(vid.videoName + ' - ' + vid.getChannelObject(self.user.channels).channelTitle), vid])
-            self.videoView.clear()
-            for couple in ret:
-                self.videoView.addItem(couple[0])
-            self.data = ret
-        elif selectedOption == 'Channel - Video':
-            newData = []
-            ret = []
-            for i in self.data:
-                newData.append(i[1])
-            for vid in newData:
-                ret.append([QListWidgetItem(vid.getChannelObject(self.user.channels).channelTitle + ' - ' + vid.videoName), vid])
-            self.videoView.clear()
-            for couple in ret:
-                self.videoView.addItem(couple[0])
-            self.data = ret
-        elif selectedOption == 'Channel':
-            channels = []
-            newData = sorted(self.channels, key=lambda channel: channel.channelTitle, reverse=False)
-            self.data = []
-            for channel in newData:
-                if not channel.channelTitle in channels:
-                    self.data.append([QListWidgetItem(channel.channelTitle), channel])
-                    channels.append(channel.channelTitle)
-            self.videoView.clear()
-            for couple in self.data:
-                self.videoView.addItem(couple[0])
-        elif selectedOption == 'Duration - Channel':
-            channels = []
-            newData = sorted(self.arr, key=lambda video: video.getChannelObject(self.user.channels).channelTitle, reverse=False)
-            self.data = []
-            for item in newData:
-                if not item.getChannelObject(self.user.channels).channelTitle in channels:
-                    self.data.append([QListWidgetItem(str(datetime.timedelta(seconds=item.getChannelObject(self.user.channels).getDuration())) + ' - ' + item.getChannelObject(self.user.channels).channelTitle), item])
-                    channels.append(item.getChannelObject(self.user.channels).channelTitle)
-            self.videoView.clear()
-            for couple in self.data:
-                self.videoView.addItem(couple[0])
+        if self.videoButton.isChecked():
+            if selectedOption == 'Date - Video (Short)':
+                newData = []
+                for i in self.data:
+                    newData.append(i[1])
+                ret = []
+                for vid in newData:
+                    ret.append([QListWidgetItem(vid.dateWatched[:12] + ' - ' + vid.videoName), vid])
+                self.videoView.clear()
+                for couple in ret:
+                    self.videoView.addItem(couple[0])
+                self.data = ret
+            elif selectedOption == 'Date - Video (Long)':
+                newData = []
+                ret = []
+                for i in self.data:
+                    newData.append(i[1])
+                for vid in newData:
+                    ret.append([QListWidgetItem(vid.dateWatched + ' - ' + vid.videoName), vid])
+                self.videoView.clear()
+                for couple in ret:
+                    self.videoView.addItem(couple[0])
+                self.data = ret
+            elif selectedOption == 'Duration - Video':
+                newData = []
+                ret = []
+                for i in self.data:
+                    newData.append(i[1])
+                for vid in newData:
+                    ret.append([QListWidgetItem(str(datetime.timedelta(seconds=vid.duration)) + ' - ' + vid.videoName), vid])
+                self.videoView.clear()
+                for couple in ret:
+                    self.videoView.addItem(couple[0])
+                self.data = ret
+            elif selectedOption == 'Video - Channel':
+                newData = []
+                ret = []
+                for i in self.data:
+                    newData.append(i[1])
+                for vid in newData:
+                    ret.append([QListWidgetItem(vid.videoName + ' - ' + vid.getChannelObject(self.user.channels).channelTitle), vid])
+                self.videoView.clear()
+                for couple in ret:
+                    self.videoView.addItem(couple[0])
+                self.data = ret
+            elif selectedOption == 'Channel - Video':
+                newData = []
+                ret = []
+                for i in self.data:
+                    newData.append(i[1])
+                for vid in newData:
+                    ret.append([QListWidgetItem(vid.getChannelObject(self.user.channels).channelTitle + ' - ' + vid.videoName), vid])
+                self.videoView.clear()
+                for couple in ret:
+                    self.videoView.addItem(couple[0])
+                self.data = ret
+        elif self.channelButton.isChecked():
+            if selectedOption == 'Channel':
+                newData = []
+                ret = []
+                for i in self.data:
+                    newData.append(i[1])
+                for channel in newData:
+                    ret.append([QListWidgetItem(channel.channelTitle), channel])
+                self.videoView.clear()
+                for couple in ret:
+                    self.videoView.addItem(couple[0])
+                self.data = ret
+            elif selectedOption == 'Duration - Channel':
+                newData = []
+                ret = []
+                for i in self.data:
+                    newData.append(i[1])
+                for channel in newData:
+                    ret.append([QListWidgetItem(str(datetime.timedelta(seconds=channel.getDuration())) + ' - ' + channel.channelTitle), channel])
+                self.videoView.clear()
+                for couple in ret:
+                    self.videoView.addItem(couple[0])
+                self.data = ret
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

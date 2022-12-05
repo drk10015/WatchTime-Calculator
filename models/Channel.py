@@ -22,3 +22,13 @@ class Channel:
 
     def getChannelID(self, url: str) -> str:
         return url[url.index('channel/') + 8:]
+    
+    def getRecentVideos(self, numOfVids = 1):
+        ret = []
+        self.channelVids = sorted(self.channelVids, key=lambda vid: vid.getDateCode(), reverse=True)
+        if len(self.channelVids) > 0:
+            for i in range(0, numOfVids):
+                ret.append(self.channelVids[i])
+        else:
+            return [0]
+        return ret
