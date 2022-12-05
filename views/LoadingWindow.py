@@ -22,7 +22,7 @@ class LoadingWindow(QMainWindow):
     def onlineLoad(self):
         self.onlineFileName = QFileDialog.getOpenFileName(self, 'Open file', str(self.CURRENT_PATH), filter= 'html(*.html)')[0]
         if self.onlineFileName[0]:
-            print(self.onlineFileName[0])
+            self.close()
             ProgressWindow(self.onlineFileName)
 
     
@@ -30,6 +30,5 @@ class LoadingWindow(QMainWindow):
         self.onlineFileName = QFileDialog.getOpenFileName(
             self, 'Open file', str(self.CURRENT_PATH), filter= 'dictionary(*.dictionary)')
         if self.onlineFileName[0]:
-            print(self.onlineFileName[0])
             self.m = MainWindow(loadAll(self.onlineFileName[0]))
             self.close()

@@ -11,7 +11,7 @@ Ui_MainWindow, QtBaseClass = uic.loadUiType(qt_creator_file2)
 Ui_MainWindow2 = Ui_MainWindow
 
 class DetailWindow(QMainWindow, Ui_MainWindow2):
-    def __init__(self, vid) -> None:
+    def __init__(self, mainWindow, vid) -> None:
         QMainWindow.__init__(self)
         Ui_MainWindow2.__init__(self)
         self.setupUi(self)
@@ -21,7 +21,7 @@ class DetailWindow(QMainWindow, Ui_MainWindow2):
         self.thumbnail.setPixmap(img.scaled(
             341, 201, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
         self.label.setText(vid.videoName)
-        self.label_2.setText(vid.channelName)
+        self.label_2.setText(vid.getChannelObject(mainWindow.user.channels).channelTitle)
         self.label_3.setText(str(datetime.timedelta(seconds=vid.duration)))
         self.descriptionLabel.setText(vid.description)
         self.dateWatchedLabel.setText(vid.dateWatched)

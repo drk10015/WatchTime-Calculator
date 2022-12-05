@@ -3,5 +3,7 @@
 /__pycache__
 /videos.dictionary
 /loads/watch-history.html
+/.DS_Store
+/user.dictionary
 *.pyc
 **/__pycache__/
