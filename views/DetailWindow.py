@@ -25,8 +25,7 @@ class DetailWindow(QMainWindow, Ui_MainWindow2):
         self.label_3.setText(str(datetime.timedelta(seconds=vid.duration)))
         self.descriptionLabel.setText(vid.description)
         self.dateWatchedLabel.setText(vid.dateWatched)
-        # self.show()
-        # print(self)
+        self.setWindowTitle(vid.videoName + ' - ' + mainWindow.user.getChannelFromId(vid.channelID).channelTitle)
         
 
     def search(self, it):

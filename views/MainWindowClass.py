@@ -28,6 +28,7 @@ class MainWindow(QMainWindow):
         self.comboBox.currentTextChanged.connect(self.categoryChanged)
         self.channelButton.clicked.connect(self.channelMode)
         self.videoButton.clicked.connect(self.videoMode)
+        self.setWindowTitle('YouTube Calculation Client')
     
     def search(self, it):
         for item in self.data:
