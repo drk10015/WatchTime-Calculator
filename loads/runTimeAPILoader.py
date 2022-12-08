@@ -53,11 +53,7 @@ def extractDate(str) -> str:
             if month in str[i:]:
                 return str[i:]
         i -= 1
-#find object and attach date
-def attachDateToObj(id, dict, date) -> None:
-    for obj in dict:
-        if obj.id == id:
-            obj.date = date
+
 #Creates a video object from the decoded json
 def getVideofromJSON(file, vjson) -> list[Video]:
     youtubeVidBase = "https://www.youtube.com/watch?v="

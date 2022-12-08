@@ -1,12 +1,16 @@
-import sys, pathlib
+import datetime
+import operator
+import pathlib
+import sys
+
 from PyQt6 import uic
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QDialog, QListWidgetItem
-import operator, datetime
 
 
 class SortWindow(QDialog):
     def __init__(self, mainWind) -> None:
-        QDialog.__init__(self)
+        QDialog.__init__(self, None, )
         self.CURRENT_PATH = pathlib.Path(__file__).parent.resolve()
         qt_creator_file3 = str(self.CURRENT_PATH)[:-5] + "/ui/sortDialog.ui"
         uic.loadUi(qt_creator_file3, self)
@@ -20,6 +24,9 @@ class SortWindow(QDialog):
         self.totalVideoButton.clicked.connect(self.numberClicked)
         self.mainWind.channelButton.clicked.connect(self.updateWindow)
         self.mainWind.videoButton.clicked.connect(self.updateWindow)
+
+        self.setWindowTitle('Sort')
+        self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
         self.updateWindow()
         self.show()
     def updateWindow(self):
