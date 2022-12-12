@@ -40,23 +40,34 @@ class MainWindow(QMainWindow):
         # self.clicked.connect(self.updateWindow)
         self.videoView.setSelectionMode(QAbstractItemView.SelectionMode.MultiSelection)
         self.enabledFilters = {'SEARCH': [],
-                               'DURATION': [],
+                               'GDURATION': [],
+                               'LDURATION': [],
                                'YEAR': []}
         self.setWindowTitle('YouTube Calculation Client')
         self._addMenus()
         self.updateWindow()
-    
-    
+
     def selectionMade(self):
         if len(self.videoView.selectedItems()) > 0:
             self.itemCountLabel.setText('Selected Item Count: ' + str(len(self.videoView.selectedItems())))
             self.durationLabel.setText('Total Duration of Selected Items: ' + str(datetime.timedelta(seconds= self.getDuration())))
         else:
             self.updateWindow()
-    
+
     def updateWindow(self):
         self.itemCountLabel.setText('Item Count: ' + str(self.getCurrentStats()['count']))
         self.durationLabel.setText('Total Duration of Items: ' + str(datetime.timedelta(seconds= self.getCurrentStats()['duration'])))
+        print(self.sender())
+        # self.getCurrentStatusOfEnFilters()
+
+    def getCurrentStatusOfEnFilters(self):
+        print('Search: ', str(len(self.enabledFilters['SEARCH'])))
+        if len(self.enabledFilters['GDURATION']) == 1 :
+            print('GDuration: ', self.enabledFilters['GDURATION'][0].text())
+        else:
+            print('GDuration: ', str(len(self.enabledFilters['GDURATION'])))
+        print('LDuration: ', str(len(self.enabledFilters['LDURATION'])))
+        print('Year: ', str(len(self.enabledFilters['YEAR'])))
 
     def getCurrentStats(self):
         ret = 0
@@ -69,6 +80,7 @@ class MainWindow(QMainWindow):
                 else:
                     dur += item[1].getDuration()
         return {'count': ret, 'duration': dur}
+    
     def search(self):
         it = self.searchBar.text()
         if not len(it) == 0:
@@ -87,8 +99,7 @@ class MainWindow(QMainWindow):
             for item in self.data:
                 self.hiddenStatus('show', item[0])
         self.updateWindow()
-        
-        
+    
     def itemDoubleClicked(self, item):
         if self.videoButton.isChecked():
             self.second = DetailWindow(self, self.getObjectFromItem(item))
@@ -124,8 +135,10 @@ class MainWindow(QMainWindow):
         locked = False
         if self.sender() == self.timer:
             obj = 'SEARCH'
-        elif self.sender() in self.durationMenuItems:
-            obj = 'DURATION'
+        elif self.sender() in [self.greater1Mon, self.greater1Day, self.greater1Min, self.greater1Hr]:
+            obj = 'GDURATION'
+        elif self.sender() in [self.less1Mon, self.less1Day, self.less1Min, self.less1Hr]:
+            obj = 'LDURATION'
         else:
             obj = 'YEAR'
         if hide == 'show':
@@ -200,10 +213,10 @@ class MainWindow(QMainWindow):
         durationMenu = filterMenu.addMenu('&Duration')
         greater = durationMenu.addMenu('Greater Than')
         less = durationMenu.addMenu('Less Than')
-        self.greater1Mon = QtGui.QAction(text='1 Month', parent=less, checkable=True)
-        self.greater1Day = QtGui.QAction(text='1 Day', parent=less, checkable=True)
-        self.greater1Hr = QtGui.QAction(text='1 Hour', parent=less, checkable=True)
-        self.greater1Min = QtGui.QAction(text='1 Minute', parent=less, checkable=True)
+        self.greater1Mon = QtGui.QAction(text='1 Month', parent=greater, checkable=True)
+        self.greater1Day = QtGui.QAction(text='1 Day', parent=greater, checkable=True)
+        self.greater1Hr = QtGui.QAction(text='1 Hour', parent=greater, checkable=True)
+        self.greater1Min = QtGui.QAction(text='1 Minute', parent=greater, checkable=True)
         self.greater1Mon.triggered.connect(lambda : self.filterMinute(1, 2592000))
         self.greater1Day.triggered.connect(lambda : self.filterMinute(1, 86400))
         self.greater1Hr.triggered.connect(lambda : self.filterMinute(1, 3600))
@@ -266,27 +279,32 @@ class MainWindow(QMainWindow):
                 timeLengthMax = self.durationMenuItems[key]
             elif key == enabled['less']:
                 timeLengthMin = self.durationMenuItems[key]
-        if enabled['greater'] and enabled['less']:
-            for item in self.data:
-                if (item[1].duration if self.videoButton.isChecked() else item[1].getDuration()) < timeLengthMax or (item[1].duration if self.videoButton.isChecked() else item[1].getDuration()) > timeLengthMin:
-                    self.hiddenStatus('hide', item[0])
-                else:
+        if self.sender().parent().title() == 'Greater Than':
+            if enabled['greater']:
+                for item in self.data:
+                    if 'Heavy RAIN with NON Stop Thunder' in item[1].videoName :
+                        pass
+                    if (item[1].duration if self.videoButton.isChecked() else item[1].getDuration()) < timeLengthMax and not item[0] in self.enabledFilters['LDURATION']:
+                        self.hiddenStatus('hide', item[0])
+                    else:
+                        self.hiddenStatus('show', item[0])
+            else:
+                for item in self.data:
                     self.hiddenStatus('show', item[0])
-        elif enabled['greater']:
-            for item in self.data:
-                if (item[1].duration if self.videoButton.isChecked() else item[1].getDuration()) < timeLengthMax:
-                    self.hiddenStatus('hide', item[0])
-                else:
+        if self.sender().parent().title() == 'Less Than':
+            print(3)
+            if enabled['less']:
+                for item in self.data:
+                    if 'Heavy RAIN with NON Stop Thunder' in item[1].videoName :
+                        pass
+                    if (item[1].duration if self.videoButton.isChecked() else item[1].getDuration()) > timeLengthMin and not item[0] in self.enabledFilters['GDURATION']:
+                        self.hiddenStatus('hide', item[0])
+                    else:
+                        self.hiddenStatus('show', item[0])
+            else:
+                for item in self.data:
                     self.hiddenStatus('show', item[0])
-        elif enabled['less']:
-            for item in self.data:
-                if (item[1].duration if self.videoButton.isChecked() else item[1].getDuration()) > timeLengthMin:
-                    self.hiddenStatus('hide', item[0])
-                else:
-                    self.hiddenStatus('show', item[0])
-        else:
-            for item in self.data:
-                self.hiddenStatus('show', item[0])
+            
         self.updateWindow()
 
     def filterYear(self):
@@ -307,8 +325,6 @@ class MainWindow(QMainWindow):
                     self.hiddenStatus('show', self.data[i][0])
         print(str(len(self.enabledFilters['SEARCH'])))
         self.updateWindow()
-
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
