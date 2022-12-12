@@ -6,13 +6,13 @@ class Channel:
         self.id = self.getChannelID(channelUrl)
         self.channelVids = vids
         self.channelUrl = channelUrl
-        self.timeWatched = self.getDuration()
+        self.duration = self.getDuration()
         self.thumbnail = thumbnail
         self.channelTitle = channelTitle
         self.description = channelDescription
 
     def addTime(self, num: int) -> None:
-        self.timeWatched += num
+        self.duration += num
 
     def getDuration(self) -> int:
         ret = 0

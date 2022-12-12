@@ -7,3 +7,4 @@
 /user.dictionary
 *.pyc
 **/__pycache__/
+/.vscode
