@@ -31,13 +31,14 @@ class MainWindow(QMainWindow):
         self.timer.setSingleShot(True)
         self.timer.setInterval(200)
         self.timer.timeout.connect(self.search)
-        self.searchBar.textChanged.connect(lambda: self.timer.start())
+        self.searchBar.textEdited.connect(lambda: self.timer.start())
+        self.searchBar.editingFinished.connect(lambda: self.timer.start())
         self.comboBox.currentTextChanged.connect(self.categoryChanged)
         self.channelButton.clicked.connect(self.channelMode)
         self.videoButton.clicked.connect(self.videoMode)
+        self.clearFilterButton.clicked.connect(self.clearFilters)
         self.videoView.indexesMoved.connect(self.updateWindow)
         self.videoView.itemSelectionChanged.connect(self.selectionMade)
-        # self.clicked.connect(self.updateWindow)
         self.videoView.setSelectionMode(QAbstractItemView.SelectionMode.MultiSelection)
         self.enabledFilters = {'SEARCH': [],
                                'GDURATION': [],
@@ -46,6 +47,30 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('YouTube Calculation Client')
         self._addMenus()
         self.updateWindow()
+        self.CURRENTLY_LOADING = False
+
+    def fixHidden(self, obj):
+        for key in self.enabledFilters.keys():
+            if (obj in self.enabledFilters[key]):
+                obj.setHidden(True)
+                return
+
+    def clearFilters(self):
+        self.toggleLoading()
+        for key in self.enabledFilters.keys():
+            self.enabledFilters[key] = []
+        for item in self.data:
+            item[0].setHidden(False)
+        self.searchBar.setText('')
+        self.uncheckYears()
+        self.updateWindow()
+        self.toggleLoading()
+
+    def uncheckYears(self):
+        for child in self.durationMenu.children():
+            for kid in child.children():
+                print(kid)
+                kid.setChecked(False)
 
     def selectionMade(self):
         if len(self.videoView.selectedItems()) > 0:
@@ -57,7 +82,6 @@ class MainWindow(QMainWindow):
     def updateWindow(self):
         self.itemCountLabel.setText('Item Count: ' + str(self.getCurrentStats()['count']))
         self.durationLabel.setText('Total Duration of Items: ' + str(datetime.timedelta(seconds= self.getCurrentStats()['duration'])))
-        print(self.sender())
         # self.getCurrentStatusOfEnFilters()
 
     def getCurrentStatusOfEnFilters(self):
@@ -82,6 +106,7 @@ class MainWindow(QMainWindow):
         return {'count': ret, 'duration': dur}
     
     def search(self):
+        self.toggleLoading()
         it = self.searchBar.text()
         if not len(it) == 0:
             for item in self.data:
@@ -96,8 +121,10 @@ class MainWindow(QMainWindow):
                     else:
                         self.hiddenStatus('show', item[0])
         else:
+            print('length was 0')
             for item in self.data:
                 self.hiddenStatus('show', item[0])
+        self.toggleLoading()
         self.updateWindow()
     
     def itemDoubleClicked(self, item):
@@ -130,14 +157,16 @@ class MainWindow(QMainWindow):
         self.comboBox.clear()
         self.comboBox.addItems(['Channel', 'Duration - Channel', 'Total Videos - Channel'])
     
-    def hiddenStatus(self, hide, item):
+    def hiddenStatus(self, hide, item, sender = None):
+        if not sender:
+            sender = self.sender()
         obj = ''
         locked = False
-        if self.sender() == self.timer:
+        if sender == self.timer:
             obj = 'SEARCH'
-        elif self.sender() in [self.greater1Mon, self.greater1Day, self.greater1Min, self.greater1Hr]:
+        elif sender in [self.greater1Mon, self.greater1Day, self.greater1Min, self.greater1Hr]:
             obj = 'GDURATION'
-        elif self.sender() in [self.less1Mon, self.less1Day, self.less1Min, self.less1Hr]:
+        elif sender in [self.less1Mon, self.less1Day, self.less1Min, self.less1Hr]:
             obj = 'LDURATION'
         else:
             obj = 'YEAR'
@@ -156,6 +185,7 @@ class MainWindow(QMainWindow):
         else:
             self.enabledFilters[obj].append(item)
             item.setHidden(True)
+            if item.isSelected(): item.setSelected(False)
             
     def videoMode(self):
         self.data = []
@@ -210,9 +240,9 @@ class MainWindow(QMainWindow):
             act.triggered.connect(self.filterYear)
             self.__setattr__('year' + str(i), act)
             yearMenu.addAction(act)
-        durationMenu = filterMenu.addMenu('&Duration')
-        greater = durationMenu.addMenu('Greater Than')
-        less = durationMenu.addMenu('Less Than')
+        self.durationMenu = filterMenu.addMenu('&Duration')
+        greater = self.durationMenu.addMenu('Greater Than')
+        less = self.durationMenu.addMenu('Less Than')
         self.greater1Mon = QtGui.QAction(text='1 Month', parent=greater, checkable=True)
         self.greater1Day = QtGui.QAction(text='1 Day', parent=greater, checkable=True)
         self.greater1Hr = QtGui.QAction(text='1 Hour', parent=greater, checkable=True)
@@ -273,6 +303,7 @@ class MainWindow(QMainWindow):
         return ret
     
     def filterMinute(self, sort, timeLength):
+        self.toggleLoading()
         enabled = self.getCheckedDurationMenu()
         for key in self.durationMenuItems.keys():
             if key == enabled['greater']:
@@ -292,7 +323,6 @@ class MainWindow(QMainWindow):
                 for item in self.data:
                     self.hiddenStatus('show', item[0])
         if self.sender().parent().title() == 'Less Than':
-            print(3)
             if enabled['less']:
                 for item in self.data:
                     if 'Heavy RAIN with NON Stop Thunder' in item[1].videoName :
@@ -304,13 +334,20 @@ class MainWindow(QMainWindow):
             else:
                 for item in self.data:
                     self.hiddenStatus('show', item[0])
-            
+        self.toggleLoading()
         self.updateWindow()
 
+    def toggleLoading(self):
+        if self.CURRENTLY_LOADING:
+            QApplication.setOverrideCursor(Qt.CursorShape.ArrowCursor)
+            self.CURRENTLY_LOADING = False
+        else:
+            QApplication.setOverrideCursor(Qt.CursorShape.BusyCursor)
+            self.CURRENTLY_LOADING = True
+        
     def filterYear(self):
-        print(str(len(self.enabledFilters['SEARCH'])))
+        self.toggleLoading()
         sender = self.sender()
-        print(self.sender())
         if not sender.isChecked():
             for item in self.data:
                 self.hiddenStatus('show', item[0])
@@ -323,7 +360,7 @@ class MainWindow(QMainWindow):
                     self.hiddenStatus('hide', self.data[i][0])
                 else:
                     self.hiddenStatus('show', self.data[i][0])
-        print(str(len(self.enabledFilters['SEARCH'])))
+        self.toggleLoading()
         self.updateWindow()
 
 if __name__ == '__main__':

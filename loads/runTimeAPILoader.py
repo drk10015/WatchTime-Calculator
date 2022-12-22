@@ -112,7 +112,7 @@ def getChannelfromJSON(file, vjson) -> list[Channel]:
         exit()
 # fetches the channel, category name, and duration in one API call
 # returns an array of Video objects
-def fetchAPIinfo(fileName, window = None) -> list[Video] :
+def fetchAPIinfo(fileName, window) -> list[Video] :
     if window:
         window.show()
     current = User([], [])
@@ -124,7 +124,7 @@ def fetchAPIinfo(fileName, window = None) -> list[Video] :
     vidIds = []
     channelIds = []
     dates = []
-    window.worker.signals.timeRemaining.emit('Out of Soup. Indexing...')
+    window.signals.timeRemaining.emit('Out of Soup. Indexing...')
     for div in doc('div'):
         active = len(div('a'))
         if active > 1:
@@ -148,8 +148,10 @@ def fetchAPIinfo(fileName, window = None) -> list[Video] :
         if i < len(channelIds):
             channel_api_url += '&id=' + channelIds[i]
         if (i % 49 == 0 and i != 0) or i == len(vidIds) - 1:
+            ################################################## H I D E  T H E S E ###################################
             video_api_url += '&key=AIzaSyDNHNVXw6TFETWGo8kdjAP4wvszh1ti-VQ'
             channel_api_url += '&key=AIzaSyDNHNVXw6TFETWGo8kdjAP4wvszh1ti-VQ'
+            #########################################################################################################
             response = requests.get(video_api_url)
             vidobj = response.json()
             if i < len(channelIds) or '&id=' in channel_api_url:
@@ -163,7 +165,7 @@ def fetchAPIinfo(fileName, window = None) -> list[Video] :
             averageTime = ((totalTime) / num)
             percentageLeft = (1 - (i / len(vidIds)) )
             if window:
-                window.worker.signals.progress.emit(int((i / len(vidIds)) * 100))
+                window.worker.signals.progress.emit(int((i / len(vidIds)) * 100), False)
                 window.worker.signals.timeRemaining.emit('Estimated Time Remaining: ' + str(int((averageTime * ((percentageLeft * len(vidIds))/ 50)) * 60)) + ' seconds')
             # print('Estimated Time Remaining:', round((averageTime * ((percentageLeft * len(ids))/ 50)), 2) * 60, 'seconds')
             beginning = time.perf_counter()

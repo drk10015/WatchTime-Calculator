@@ -6,6 +6,8 @@ from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 
 from loads.offlineLoader import loadAll
+from loads.runTimeAPILoader import fetchAPIinfo, saveDictionaryFile
+from models.User import User
 from views.MainWindowClass import MainWindow
 from views.ProgressWindow import ProgressWindow
 
@@ -23,8 +25,14 @@ class LoadingWindow(QMainWindow):
         self.onlineFileName = QFileDialog.getOpenFileName(self, 'Open file', str(self.CURRENT_PATH), filter= 'html(*.html)')[0]
         if self.onlineFileName[0]:
             self.close()
-            ProgressWindow(self.onlineFileName)
+            self.pWin = ProgressWindow(beginFunction=self.startLoad, end=self.endLoad)
 
+    def startLoad(self):
+        fetchAPIinfo(self.onlineFileName, self.pWin)
+
+    def endLoad(self, result: User):
+        saveDictionaryFile('user.dictionary', result)
+        self.m = MainWindow(result)
     
     def offlineLoad(self):
         self.onlineFileName = QFileDialog.getOpenFileName(

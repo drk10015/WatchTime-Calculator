@@ -65,9 +65,9 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="filterButton">
+       <widget class="QPushButton" name="clearFilterButton">
         <property name="text">
-         <string>Filter</string>
+         <string>Clear Filters</string>
         </property>
        </widget>
       </item>
